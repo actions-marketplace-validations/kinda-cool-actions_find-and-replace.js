@@ -18,8 +18,13 @@ const RegexPattern = z.array(
 
 type RegexPattern = z.output<typeof RegexPattern>
 
-export function main() {
-  const input = core.getInput('patterns')
+/**
+ * This file is the actual logic of the action
+ * @returns {Promise<void>} Resolves when the action is complete
+ */
+export async function run(): Promise<void> {
+  const input = core.getInput('patterns_file')
+  core.debug(input)
   const parsed_regex = regexParser(input)
   fileRegexReplace(parsed_regex!)
 }
@@ -36,7 +41,8 @@ function catchError(e: unknown, defaultMsg: string): never {
 function regexParser(regex_patterns: string): RegexPattern | undefined {
   let parsed_regex: RegexPattern
   try {
-    parsed_regex = RegexPattern.parse(JSON.parse(regex_patterns))
+    const json_contents = readFileSync(regex_patterns, 'utf-8')
+    parsed_regex = RegexPattern.parse(JSON.parse(json_contents))
   } catch (e) {
     catchError(
       e,
