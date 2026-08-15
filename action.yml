@@ -9,15 +9,15 @@ branding:
 
 # Define your inputs here.
 inputs:
-  milliseconds:
+  patterns_file:
     description: Your input description here
     required: true
-    default: '1000'
+    default: '[]'
 
-# Define your outputs here.
-outputs:
-  time:
-    description: Your output description here
+# # Define your outputs here.
+# outputs:
+#   time:
+#     description: Your output description here
 
 runs:
   using: node24
