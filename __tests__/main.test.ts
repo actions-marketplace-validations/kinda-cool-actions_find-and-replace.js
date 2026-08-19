@@ -6,12 +6,10 @@
  * so that the actual '@actions/core' module is not imported.
  */
 import * as core from '../__fixtures__/core.js'
-import { wait } from '../__fixtures__/wait.js'
-import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest'
+import { vi, describe, beforeEach, it, afterEach, expect } from 'vitest'
 
 // Mocks should be declared before the module being tested is imported.
 vi.mock('@actions/core', () => core)
-vi.mock('../src/wait.js', () => ({ wait }))
 
 // The module being tested should be imported dynamically. This ensures that the
 // mocks are used in place of any actual dependencies.
@@ -21,9 +19,6 @@ describe('main.ts', () => {
   beforeEach(() => {
     // Set the action's inputs as return values from core.getInput().
     core.getInput.mockImplementation(() => '500')
-
-    // Mock the wait function so that it does not actually wait.
-    wait.mockImplementation(() => Promise.resolve('done!'))
   })
 
   afterEach(() => {
@@ -45,12 +40,6 @@ describe('main.ts', () => {
   it('Sets a failed status', async () => {
     // Clear the getInput mock and return an invalid value.
     core.getInput.mockClear().mockReturnValueOnce('this is not a number')
-
-    // Clear the wait mock and return a rejected promise.
-    wait
-      .mockClear()
-      .mockRejectedValueOnce(new Error('milliseconds is not a number'))
-
     await run()
 
     // Verify that the action was marked as failed.
