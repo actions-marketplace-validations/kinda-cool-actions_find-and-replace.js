@@ -5,7 +5,7 @@ import * as core from '@actions/core'
 
 const RegexPattern = z.array(
   z.object({
-    find: z.string().transform((s) => RegExp(s)),
+    find: z.custom<RegExp>(isRegExp),
     replace: z.string(),
     file: z.string(),
     flags: z
@@ -16,6 +16,15 @@ const RegexPattern = z.array(
   })
 )
 
+function isRegExp(val: unknown): boolean {
+  try {
+    RegExp(val)
+  } catch {
+    return false
+  }
+  return true
+}
+
 type RegexPattern = z.output<typeof RegexPattern>
 
 /**
@@ -25,7 +34,7 @@ type RegexPattern = z.output<typeof RegexPattern>
 export async function run(): Promise<void> {
   const input = core.getInput('patterns_file')
   core.debug(input)
-  const parsed_regex = regexParser(input)
+  const parsed_regex = await regexParser(input)
   fileRegexReplace(parsed_regex!)
 }
 
@@ -38,18 +47,22 @@ function catchError(e: unknown, defaultMsg: string): never {
   exit(1)
 }
 
-function regexParser(regex_patterns: string): RegexPattern | undefined {
+async function regexParser(
+  regex_patterns: string
+): Promise<RegexPattern | undefined> {
   let parsed_regex: RegexPattern
   try {
-    const json_contents = readFileSync(regex_patterns, 'utf-8')
-    parsed_regex = RegexPattern.parse(JSON.parse(json_contents))
+    const module = await import(`${process.cwd()}/${regex_patterns}`)
+    parsed_regex = RegexPattern.parse(module.default)
   } catch (e) {
     catchError(
       e,
       'Failed to parse regex pattern. Please ensure your regex patterns are valid.'
     )
   }
-  core.debug(`Parsed regex pattern:\n${parsed_regex.toString()}`)
+  for (const pattern of parsed_regex) {
+    core.debug(pattern.find.toString())
+  }
   return parsed_regex
 }
 
