@@ -3,40 +3,20 @@ import { exit } from 'node:process'
 import * as z from 'zod'
 import * as core from '@actions/core'
 
-const RegexPattern = z.array(
-  z.object({
-    find: z.custom<RegExp>(isRegExp),
-    replace: z.string(),
-    file: z.string(),
-    flags: z
-      .string()
-      .regex(/^[dgimsuvy]*$/)
-      .max(8)
-      .default('')
-  })
-)
+const FindAndReplaceFile = z.string().endsWith('.js')
+type FindAndReplaceFile = z.output<typeof FindAndReplaceFile>
 
-function isRegExp(val: unknown): boolean {
-  try {
-    RegExp(val)
-  } catch {
-    return false
-  }
-  return true
-}
+const ExportedRegExp = z.object({
+  find: z.instanceof(RegExp),
+  replace: z.string(),
+  files: z.union([z.array(z.string()), z.string().transform((obj) => [obj])])
+})
 
-type RegexPattern = z.output<typeof RegexPattern>
-
-/**
- * This file is the actual logic of the action
- * @returns {Promise<void>} Resolves when the action is complete
- */
-export async function run(): Promise<void> {
-  const input = core.getInput('patterns_file')
-  core.debug(input)
-  const parsed_regex = await regexParser(input)
-  fileRegexReplace(parsed_regex!)
-}
+const DefaultExport = z.union([
+  ExportedRegExp.transform((obj) => [obj]),
+  z.array(ExportedRegExp)
+])
+type DefaultExport = z.output<typeof DefaultExport>
 
 function catchError(e: unknown, defaultMsg: string): never {
   if (e instanceof Error) {
@@ -47,42 +27,64 @@ function catchError(e: unknown, defaultMsg: string): never {
   exit(1)
 }
 
-async function regexParser(
-  regex_patterns: string
-): Promise<RegexPattern | undefined> {
-  let parsed_regex: RegexPattern
+/**
+ * This file is the actual logic of the action
+ * @returns {Promise<void>} Resolves when the action is complete
+ */
+export async function run(): Promise<void> {
+  const inputFindAndReplaceFile = core.getInput('find_and_replace_file')
+  core.debug(inputFindAndReplaceFile)
   try {
-    const module = await import(`${process.cwd()}/${regex_patterns}`)
-    parsed_regex = RegexPattern.parse(module.default)
+    FindAndReplaceFile.parse(inputFindAndReplaceFile)
+  } catch (e) {
+    catchError(e, 'Sorry, the input file cannot be recognized as a JS file.')
+  }
+  const parsed_regex = await regexParser(inputFindAndReplaceFile)
+  findAndReplace(parsed_regex)
+}
+
+async function regexParser(
+  inputFindAndReplaceFile: FindAndReplaceFile
+): Promise<DefaultExport> | never {
+  let module: { default: DefaultExport }
+  try {
+    module = await import(`${process.cwd()}/${inputFindAndReplaceFile}`)
   } catch (e) {
     catchError(
       e,
       'Failed to parse regex pattern. Please ensure your regex patterns are valid.'
     )
   }
+  let parsed_regex: DefaultExport
+  try {
+    parsed_regex = DefaultExport.parse(module.default)
+  } catch (e) {
+    catchError(
+      e,
+      `Sorry, the default export in ${inputFindAndReplaceFile}could not be found or recognized as an expected type.`
+    )
+  }
+
   for (const pattern of parsed_regex) {
     core.debug(pattern.find.toString())
   }
   return parsed_regex
 }
 
-function fileRegexReplace(parsed_regex: RegexPattern) {
+function findAndReplace(parsed_regex: DefaultExport) {
   for (const pattern of parsed_regex) {
-    let file_contents
-    try {
-      file_contents = readFileSync(pattern.file, 'utf-8')
-    } catch (e) {
-      catchError(e, `${pattern.file} is not a valid file.`)
+    for (const file of pattern.files) {
+      let file_contents
+      try {
+        file_contents = readFileSync(file, 'utf-8')
+      } catch (e) {
+        catchError(e, `${file} is not a valid file.`)
+      }
+      const new_file_contents = file_contents.replace(
+        pattern.find,
+        pattern.replace
+      )
+      writeFileSync(file, new_file_contents, 'utf-8')
     }
-    const full_regex = RegExp(pattern.find, pattern.flags)
-    const new_file_contents = file_contents.replace(full_regex, pattern.replace)
-    writeFileSync(pattern.file, new_file_contents, 'utf-8')
   }
 }
-// const jsonInput = [
-//   {
-//     find: /mermaid-maker\/action@v\d+\.\d+\.\d+/.source,
-//     replace: 'mermaid-maker/action@v1.2.3',
-//     file: 'example.md'
-//   }
-// ]

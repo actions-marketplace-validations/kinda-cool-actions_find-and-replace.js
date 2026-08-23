@@ -9,15 +9,22 @@ branding:
 
 # Define your inputs here.
 inputs:
-  patterns_file:
-    description: Your input description here
-    required: true
-    default: '[]'
+  find_and_replace_file:
+    description: |
+      The find and replace JS file. This JS file must have a default
+      export that exports an array with the following shape:
+        Array<{
+            find: RegExp
+            replace: string
+            files: Array<string>
+          }>
+      Expectedly, any expressions that match `find` will be replaced
+      by `replace` in all files in `files`.
 
-# # Define your outputs here.
-# outputs:
-#   time:
-#     description: Your output description here
+      `files` cannot contain any glob patterns; it's too powerful for
+      regex use.
+    required: true
+    default: 'find_and_replace.js'
 
 runs:
   using: node24

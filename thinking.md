@@ -62,3 +62,16 @@ Want to do it across different apps, i.e. must be distributable.
 Want to do it with as least effort as possible, i.e. no building plz
 --------------------------------------------------
 ```
+
+ok so to finalize the JS file's api, is can have a default export with
+the following:
+
+```js
+Array<{
+    find: RegExp
+    replace: string
+    files: Array<string>
+  }>
+```
+
+files will be an array that does not accept glob patterns since it's too powerful.
