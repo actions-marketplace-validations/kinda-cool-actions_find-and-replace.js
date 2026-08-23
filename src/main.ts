@@ -27,23 +27,23 @@ function catchError(e: unknown, defaultMsg: string): never {
   exit(1)
 }
 
-/**
- * This file is the actual logic of the action
- * @returns {Promise<void>} Resolves when the action is complete
- */
 export async function run(): Promise<void> {
+  const inputFindAndReplaceFile = parseInputFindAndReplaceFile()
+  const regexPatterns = await parseRegexPatterns(inputFindAndReplaceFile)
+  findAndReplace(regexPatterns)
+}
+
+export function parseInputFindAndReplaceFile(): FindAndReplaceFile | never {
   const inputFindAndReplaceFile = core.getInput('find_and_replace_file')
   core.debug(inputFindAndReplaceFile)
   try {
-    FindAndReplaceFile.parse(inputFindAndReplaceFile)
+    return FindAndReplaceFile.parse(inputFindAndReplaceFile)
   } catch (e) {
     catchError(e, 'Sorry, the input file cannot be recognized as a JS file.')
   }
-  const parsed_regex = await regexParser(inputFindAndReplaceFile)
-  findAndReplace(parsed_regex)
 }
 
-async function regexParser(
+export async function parseRegexPatterns(
   inputFindAndReplaceFile: FindAndReplaceFile
 ): Promise<DefaultExport> | never {
   let module: { default: DefaultExport }
@@ -71,7 +71,7 @@ async function regexParser(
   return parsed_regex
 }
 
-function findAndReplace(parsed_regex: DefaultExport) {
+export function findAndReplace(parsed_regex: DefaultExport) {
   for (const pattern of parsed_regex) {
     for (const file of pattern.files) {
       let file_contents
