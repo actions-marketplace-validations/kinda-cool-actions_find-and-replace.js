@@ -52,6 +52,7 @@ export default defineConfig([
           is used to include them back*/
           allowDefaultProject: [
             '__fixtures__/*.ts',
+            '__fixtures__/find_and_replace_files/*.js',
             '__tests__/*.ts',
             'eslint.config.ts',
             'vitest.config.ts',
