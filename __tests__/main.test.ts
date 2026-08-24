@@ -6,16 +6,56 @@
  * so that the actual '@actions/core' module is not imported.
  */
 import * as core from '../__fixtures__/core.js'
-import { vi, describe, beforeEach, it, afterEach, expect } from 'vitest'
+import { vi, describe, beforeEach, it, afterEach, expect, test } from 'vitest'
+import {
+  run,
+  parseRegexPatterns,
+  parseInputFindAndReplaceFile,
+  findAndReplace,
+  InputDefaultExport
+} from '../src/main.js'
+import { getInput } from '@actions/core'
+import { exit } from 'node:process'
+import { readFileSync, writeFileSync } from 'node:fs'
+import {
+  fixtureFindAndReplaceFilesPath,
+  fixtureReplaceTargetFiles
+} from '../__fixtures__/utils.js'
 
 // Mocks should be declared before the module being tested is imported.
-vi.mock('@actions/core', () => core)
-
-// The module being tested should be imported dynamically. This ensures that the
-// mocks are used in place of any actual dependencies.
-const { run } = await import('../src/main.js')
+vi.mock(import('@actions/core'), () => core)
+vi.mock(import('node:process'), async (orig) => {
+  const mod = await orig()
+  return {
+    ...mod,
+    exit: vi.fn<typeof exit>(() => {
+      throw Error('exit')
+    })
+  }
+})
+vi.mock(import('node:fs'), async (importOriginal) => {
+  const mod = await importOriginal()
+  return {
+    ...mod,
+    readFileSync: vi.fn()
+  }
+})
 
 describe('main.ts', () => {
+  afterEach(() => {
+    vi.resetAllMocks()
+  })
+  test('parseInputFindAndReplaceFile', () => {
+    vi.mocked(getInput).mockImplementationOnce(() => 'patterns.js')
+    expect(parseInputFindAndReplaceFile()).toBe('patterns.js')
+    vi.mocked(getInput).mockImplementationOnce(() => 'hi.txt')
+    expect(parseInputFindAndReplaceFile).toThrow('exit')
+  })
+  test('parseRegexPatterns', () => {
+    // todo..
+  })
+})
+describe('main.tsa', () => {
   beforeEach(() => {
     // Set the action's inputs as return values from core.getInput().
     core.getInput.mockImplementation(() => '500')
