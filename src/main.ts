@@ -7,7 +7,7 @@ const FindAndReplaceFile = z.string().endsWith('.js')
 type FindAndReplaceFile = z.output<typeof FindAndReplaceFile>
 
 const ExportedRegExp = z.object({
-  find: z.instanceof(RegExp),
+  find: z.union([z.instanceof(RegExp), z.string()]),
   replace: z.string(),
   files: z.union([z.array(z.string()), z.string().transform((obj) => [obj])])
 })
@@ -16,6 +16,7 @@ const DefaultExport = z.union([
   ExportedRegExp.transform((obj) => [obj]),
   z.array(ExportedRegExp)
 ])
+export type InputDefaultExport = z.input<typeof DefaultExport>
 type DefaultExport = z.output<typeof DefaultExport>
 
 function catchError(e: unknown, defaultMsg: string): never {
