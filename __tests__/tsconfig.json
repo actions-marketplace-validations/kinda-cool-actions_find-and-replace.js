@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "references": [
+    { "path": "../src/tsconfig.json" },
+    { "path": "../__fixtures__/tsconfig.json" }
+  ],
+  "include": ["*.ts"]
+}
