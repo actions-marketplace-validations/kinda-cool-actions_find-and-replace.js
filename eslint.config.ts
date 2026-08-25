@@ -38,30 +38,7 @@ export default defineConfig([
     ],
     languageOptions: {
       // node is a global object
-      globals: globals.node,
-      /* the following provides typed linting for test files
-        this means that instead of regular ol' eslinting, it's
-        gonna use the project's tsconfig to compile the files to
-        check for linting errors. as expected, it meant to catch
-        more linting errors at the expense of performance.
-        rumour has it ts7 is going to be a lot faster, so it may be
-        less of a deal in the future*/
-      parserOptions: {
-        projectService: {
-          /* since tsconfig excludes these files, allowDefaultProject 
-          is used to include them back*/
-          allowDefaultProject: [
-            '__fixtures__/*.ts',
-            '__fixtures__/find_and_replace_files/*.js',
-            '__tests__/*.ts',
-            'eslint.config.ts',
-            'vitest.config.ts',
-            'rollup.config.ts'
-          ],
-          // path to tsconfig
-          tsconfigRootDir: import.meta.dirname
-        }
-      }
+      globals: globals.node
     },
     // some more custom rules
     rules: {
