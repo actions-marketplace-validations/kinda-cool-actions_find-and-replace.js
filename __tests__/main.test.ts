@@ -21,9 +21,12 @@ import {
   fixtureReplaceTargetFiles
 } from '../__fixtures__/utils.js'
 import { basename, join } from 'node:path'
+import z from 'zod'
 
 // Mocks should be declared before the module being tested is imported.
 vi.mock(import('@actions/core'), () => core)
+
+// mock exit function to avoid exitting tests
 vi.mock(import('node:process'), async (orig) => {
   const mod = await orig()
   return {
@@ -33,6 +36,8 @@ vi.mock(import('node:process'), async (orig) => {
     })
   }
 })
+
+// mock read and write file functions to create repeatable snapshots
 vi.mock(import('node:fs'), async (importOriginal) => {
   const mod = await importOriginal()
   return {
@@ -43,22 +48,34 @@ vi.mock(import('node:fs'), async (importOriginal) => {
 })
 
 describe('main.ts', () => {
+  // reset mock implementations and call history
   afterEach(() => {
     vi.resetAllMocks()
   })
+
   test('parseInputFindAndReplaceFile', () => {
+    // simply using JS filename (no actual file needed)
     vi.mocked(getInput).mockImplementationOnce(() => 'patterns.js')
     expect(parseInputFindAndReplaceFile()).toBe('patterns.js')
     vi.mocked(getInput).mockImplementationOnce(() => 'hi.txt')
     expect(parseInputFindAndReplaceFile).toThrow('exit')
   })
+
   test('parseRegexPatterns', async () => {
-    // todo..
+    // get all fxiture js files
     const matches = globSync(fixtureFindAndReplaceFilesPath + '*.js')
     for (const match of matches) {
       const parsedRegex = await parseRegexPatterns(match)
-      expect(DefaultExport.parse(parsedRegex).length).toBeGreaterThan(0)
+      expect(parsedRegex).toBeTruthy()
+      // check that parsedRegex was correctly parsed
+      expect(DefaultExport.parse(parsedRegex)).toStrictEqual(parsedRegex)
     }
+    // check that a default export with the wrong shape throws an error
+    await expect(() =>
+      parseRegexPatterns('__fixtures__/badFindAndReplaceFile.js')
+    ).rejects.toThrow()
+
+    // check for missing file, import error
   })
   test('findAndReplace', async () => {
     const filename_to_regex: Record<string, DefaultExport> = {}
