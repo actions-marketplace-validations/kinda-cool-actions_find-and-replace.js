@@ -2,6 +2,8 @@
 
 My name is Ahmed Mohamed. Good meeting you!
 
+One of my favorite projects is: `mermaid-maker/action@v3.2.1`, go check it out!
+
 I currently reside in Toronto, GTA. The weather here is currently 24°C. It's nice and warm right now...
 
 I am an upcoming graduate at UofT majoring in Computer Science & Sociology (weird mix i know).

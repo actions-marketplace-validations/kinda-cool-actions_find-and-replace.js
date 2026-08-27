@@ -1,5 +1,7 @@
 # Mermaid-Maker
 
+`- uses: 'mermaid-maker/action@v5.6.7`
+
 This action converts [mermaid](https://github.com/mermaid-js/mermaid) definition
 files into one of the output formats: PNG, SVG, PDf.
 
