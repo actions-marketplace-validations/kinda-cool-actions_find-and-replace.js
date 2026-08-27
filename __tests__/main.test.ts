@@ -21,7 +21,6 @@ import {
   fixtureReplaceTargetFiles
 } from '../__fixtures__/utils.js'
 import { basename, join } from 'node:path'
-import z from 'zod'
 
 // Mocks should be declared before the module being tested is imported.
 vi.mock(import('@actions/core'), () => core)
@@ -73,43 +72,68 @@ describe('main.ts', () => {
     // check that a default export with the wrong shape throws an error
     await expect(() =>
       parseRegexPatterns('__fixtures__/badFindAndReplaceFile.js')
-    ).rejects.toThrow()
+    ).rejects.toThrow('exit')
 
-    // check for missing file, import error
+    // test with file that doesnt exist
+    await expect(() =>
+      parseRegexPatterns('randomfilethatdoesntexist.js')
+    ).rejects.toThrow('exit')
   })
   test('findAndReplace', async () => {
-    const filename_to_regex: Record<string, DefaultExport> = {}
-    console.log(process.cwd())
+    // get the regex patterns in each file and store in dict
+    const jsFileToRegex: Record<string, DefaultExport> = {}
     const matches = globSync('./' + fixtureFindAndReplaceFilesPath + '*.js')
     for (const match of matches) {
       const path = join(process.cwd(), match)
       const module = await import(path)
       const defaultExport = module.default
-      filename_to_regex[match] = DefaultExport.parse(defaultExport)
+      jsFileToRegex[match] = DefaultExport.parse(defaultExport)
     }
-    let i = 0
+
+    // we're gonna make the filesystem with a simple dictionary
     const fake_filesystem: Record<string, string> = {}
-    const readingFiles = globSync(fixtureReplaceTargetFiles + '*')
+    // used to unmock readFileSync -- get the actual implementation
     vi.doUnmock(import('node:fs'))
     const { readFileSync: unmockedReadFile } = await import('node:fs')
-    for (const file of readingFiles) {
+    const replaceTargetFiles = globSync(fixtureReplaceTargetFiles + '*')
+    for (const file of replaceTargetFiles) {
       fake_filesystem[file] = unmockedReadFile(file, 'utf-8')
     }
+    // mock readFileSync by having it read from our fake fs
     vi.mocked(readFileSync).mockImplementation((filename) => {
       return fake_filesystem[filename.toString()]
     })
+    // mock writeFileSync by having it write to our fake fs
     vi.mocked(writeFileSync).mockImplementation((filename, contents) => {
       fake_filesystem[filename.toString()] = contents.toString()
     })
-    for (const key in filename_to_regex) {
-      findAndReplace(filename_to_regex[key])
-      for (let j = i; j < vi.mocked(writeFileSync).mock.calls.length; j++) {
-        const calls = vi.mocked(writeFileSync).mock.calls
-        expect(fake_filesystem[calls[j][0].toString()]).toMatchFileSnapshot(
-          `__snapshots__/${basename(key, '.js')}/${basename(calls[j][0].toString())}`
-        )
+
+    let nextCallIndex = 0
+    for (const jsFile in jsFileToRegex) {
+      findAndReplace(jsFileToRegex[jsFile])
+
+      /* writeFileSync can be called multiple times b/c
+      multiple regex patterns can write to the same file*/
+      for (
+        let i = nextCallIndex;
+        i < vi.mocked(writeFileSync).mock.calls.length;
         i++
+      ) {
+        const calls = vi.mocked(writeFileSync).mock.calls
+        const replaceTargetFile = calls[i][0].toString()
+        // create snapshot in directory jsFile, with name replaceTargetFile
+        await expect(fake_filesystem[replaceTargetFile]).toMatchFileSnapshot(
+          `__snapshots__/${basename(jsFile, '.js')}/${basename(replaceTargetFile)}`
+        )
+        nextCallIndex++
       }
     }
+
+    // test with file that doesnt exist
+    expect(() =>
+      findAndReplace([
+        { find: 'hello', replace: 'bye', files: ['fileThatDoesntExit.txt'] }
+      ])
+    ).toThrow('exit')
   })
 })
