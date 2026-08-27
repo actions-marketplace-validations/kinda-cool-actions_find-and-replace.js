@@ -77,13 +77,23 @@ export function findAndReplace(parsed_regex: DefaultExport) {
       try {
         file_contents = readFileSync(file, 'utf-8')
       } catch (e) {
-        catchError(e, `${file} is not a valid file.`)
+        catchError(
+          e,
+          `${file} cannot be read. Please make sure the file exists, and you have the necessary permissions to read it.`
+        )
       }
       const new_file_contents = file_contents.replace(
         pattern.find,
         pattern.replace
       )
-      writeFileSync(file, new_file_contents, 'utf-8')
+      try {
+        writeFileSync(file, new_file_contents, 'utf-8')
+      } catch (e) {
+        catchError(
+          e,
+          `${file} could not be written to. Please make sure the file exists, and you have the necessary permissions to write to it.`
+        )
+      }
     }
   }
 }
