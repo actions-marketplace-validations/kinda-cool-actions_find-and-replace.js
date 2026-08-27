@@ -32668,7 +32668,7 @@ const DefaultExport = union([
 ]);
 function catchError(e, defaultMsg) {
     if (e instanceof Error) {
-        setFailed(e.message);
+        setFailed(e.message + `\n\nHint:${defaultMsg}`);
     }
     else {
         setFailed(defaultMsg);
@@ -32686,7 +32686,7 @@ function parseInputFindAndReplaceFile() {
         return FindAndReplaceFile.parse(inputFindAndReplaceFile);
     }
     catch (e) {
-        catchError(e, 'Sorry, the input file cannot be recognized as a JS file.');
+        catchError(e, 'The input file cannot be recognized as a JS file.');
     }
 }
 async function parseRegexPatterns(inputFindAndReplaceFile) {
@@ -32695,7 +32695,7 @@ async function parseRegexPatterns(inputFindAndReplaceFile) {
         module = (await import(`${process.cwd()}/${inputFindAndReplaceFile}`));
     }
     catch (e) {
-        catchError(e, 'Failed to parse regex pattern. Please ensure your regex patterns are valid.');
+        catchError(e, 'Failed to import the find-and-replace file. Please make sure it exists.');
     }
     let parsed_regex;
     try {
@@ -32712,12 +32712,19 @@ function findAndReplace(parsed_regex) {
             let file_contents;
             try {
                 file_contents = readFileSync(file, 'utf-8');
+                if (file_contents === undefined)
+                    throw Error('File cannot be read.');
             }
             catch (e) {
-                catchError(e, `${file} is not a valid file.`);
+                catchError(e, `${file} cannot be read. Please make sure the file exists, and you have the necessary permissions to read it.`);
             }
             const new_file_contents = file_contents.replace(pattern.find, pattern.replace);
-            writeFileSync(file, new_file_contents, 'utf-8');
+            try {
+                writeFileSync(file, new_file_contents, 'utf-8');
+            }
+            catch (e) {
+                catchError(e, `${file} could not be written to. Please make sure the file exists, and you have the necessary permissions to write to it.`);
+            }
         }
     }
 }
