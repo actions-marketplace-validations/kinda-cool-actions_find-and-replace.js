@@ -54,7 +54,7 @@ export async function parseRegexPatterns(
   } catch (e) {
     catchError(
       e,
-      'Failed to parse regex pattern. Please ensure your regex patterns are valid.'
+      'Failed to import the find-and-replace file. Please make sure it exists.'
     )
   }
   let parsed_regex: DefaultExport
