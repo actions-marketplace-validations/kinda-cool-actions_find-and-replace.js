@@ -27,14 +27,14 @@ export const objSimpleArray: InputDefaultExport[] = [
 ]
 
 export const objRegexSingle: InputDefaultExport = {
-  find: /mermaid-maker\/action@v\d+\.\d+\.\d+/,
+  find: /mermaid-maker\/action@v\d+\.\d+\.\d+/g,
   replace: 'mermaid-maker/action@v1.2.3',
   files: fixtureReplaceTargetFiles + 'exampleREADME.md'
 }
 
 export const objRegexArray: InputDefaultExport[] = [
   {
-    find: /mermaid-maker\/action@v\d+\.\d+\.\d+/,
+    find: /mermaid-maker\/action@v\d+\.\d+\.\d+/g,
     replace: 'mermaid-maker/action@v1.2.3',
     files: [
       fixtureReplaceTargetFiles + 'exampleREADME.md',

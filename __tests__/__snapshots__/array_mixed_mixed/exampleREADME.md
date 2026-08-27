@@ -16,7 +16,7 @@ static mermaid diagrams in production; this action helps you with that.
 
 ```yml
 - name: Generate mermaid diagrams
-  uses: 'mermaid-maker/action@v5.6.7'
+  uses: 'mermaid-maker/action@v1.2.3'
   with:
     pkg_manager: pnpm # replace with your node pkg manager (npm/pnpm/bun)
     output_file_extension: svg # replace with your desired output file (svg/png/pdf)
