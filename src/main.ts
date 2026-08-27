@@ -12,18 +12,18 @@ const ExportedRegExp = z.object({
   files: z.union([z.array(z.string()), z.string().transform((obj) => [obj])])
 })
 
-const DefaultExport = z.union([
+export const DefaultExport = z.union([
   ExportedRegExp.transform((obj) => [obj]),
   z.array(ExportedRegExp)
 ])
 export type InputDefaultExport = z.input<typeof DefaultExport>
-type DefaultExport = z.output<typeof DefaultExport>
+export type DefaultExport = z.output<typeof DefaultExport>
 
 function catchError(e: unknown, defaultMsg: string): never {
   if (e instanceof Error) {
-    core.debug(e.message)
+    core.setFailed(e.message)
   } else {
-    core.debug(defaultMsg)
+    core.setFailed(defaultMsg)
   }
   exit(1)
 }
@@ -36,7 +36,6 @@ export async function run(): Promise<void> {
 
 export function parseInputFindAndReplaceFile(): FindAndReplaceFile | never {
   const inputFindAndReplaceFile = core.getInput('find_and_replace_file')
-  core.debug(inputFindAndReplaceFile)
   try {
     return FindAndReplaceFile.parse(inputFindAndReplaceFile)
   } catch (e) {
@@ -47,9 +46,11 @@ export function parseInputFindAndReplaceFile(): FindAndReplaceFile | never {
 export async function parseRegexPatterns(
   inputFindAndReplaceFile: FindAndReplaceFile
 ): Promise<DefaultExport> | never {
-  let module: { default: DefaultExport }
+  let module
   try {
-    module = await import(`${process.cwd()}/${inputFindAndReplaceFile}`)
+    module = (await import(`${process.cwd()}/${inputFindAndReplaceFile}`)) as {
+      default: InputDefaultExport
+    }
   } catch (e) {
     catchError(
       e,
@@ -62,13 +63,10 @@ export async function parseRegexPatterns(
   } catch (e) {
     catchError(
       e,
-      `Sorry, the default export in ${inputFindAndReplaceFile}could not be found or recognized as an expected type.`
+      `Sorry, the default export in ${inputFindAndReplaceFile} could not be found or recognized as an expected type.`
     )
   }
 
-  for (const pattern of parsed_regex) {
-    core.debug(pattern.find.toString())
-  }
   return parsed_regex
 }
 
