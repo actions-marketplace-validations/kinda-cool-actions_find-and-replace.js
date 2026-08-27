@@ -4342,6 +4342,25 @@ function toCommandValue(input) {
     }
     return JSON.stringify(input);
 }
+/**
+ *
+ * @param annotationProperties
+ * @returns The command properties to send with the actual annotation command
+ * See IssueCommandProperties: https://github.com/actions/runner/blob/main/src/Runner.Worker/ActionCommandManager.cs#L646
+ */
+function toCommandProperties(annotationProperties) {
+    if (!Object.keys(annotationProperties).length) {
+        return {};
+    }
+    return {
+        title: annotationProperties.title,
+        file: annotationProperties.file,
+        line: annotationProperties.startLine,
+        endLine: annotationProperties.endLine,
+        col: annotationProperties.startColumn,
+        endColumn: annotationProperties.endColumn
+    };
+}
 
 /**
  * Issues a command to the GitHub Actions runner
@@ -32616,12 +32635,25 @@ function getInput(name, options) {
     const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`] || '';
     return val.trim();
 }
+//-----------------------------------------------------------------------
+// Results
+//-----------------------------------------------------------------------
 /**
- * Writes debug message to user log
- * @param message debug message
+ * Sets the action status to failed.
+ * When the action exits it will be with an exit code of 1
+ * @param message add error issue message
  */
-function debug(message) {
-    issueCommand('debug', {}, message);
+function setFailed(message) {
+    process.exitCode = ExitCode.Failure;
+    error(message);
+}
+/**
+ * Adds an error issue
+ * @param message error issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function error(message, properties = {}) {
+    issueCommand('error', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 
 const FindAndReplaceFile = string().endsWith('.js');
@@ -32636,10 +32668,10 @@ const DefaultExport = union([
 ]);
 function catchError(e, defaultMsg) {
     if (e instanceof Error) {
-        debug(e.message);
+        setFailed(e.message);
     }
     else {
-        debug(defaultMsg);
+        setFailed(defaultMsg);
     }
     exit(1);
 }
@@ -32650,7 +32682,6 @@ async function run() {
 }
 function parseInputFindAndReplaceFile() {
     const inputFindAndReplaceFile = getInput('find_and_replace_file');
-    debug(inputFindAndReplaceFile);
     try {
         return FindAndReplaceFile.parse(inputFindAndReplaceFile);
     }
@@ -32671,10 +32702,7 @@ async function parseRegexPatterns(inputFindAndReplaceFile) {
         parsed_regex = DefaultExport.parse(module.default);
     }
     catch (e) {
-        catchError(e, `Sorry, the default export in ${inputFindAndReplaceFile}could not be found or recognized as an expected type.`);
-    }
-    for (const pattern of parsed_regex) {
-        debug(pattern.find.toString());
+        catchError(e, `Sorry, the default export in ${inputFindAndReplaceFile} could not be found or recognized as an expected type.`);
     }
     return parsed_regex;
 }
