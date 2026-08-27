@@ -21,7 +21,7 @@ export type DefaultExport = z.output<typeof DefaultExport>
 
 function catchError(e: unknown, defaultMsg: string): never {
   if (e instanceof Error) {
-    core.setFailed(e.message)
+    core.setFailed(e.message + `\n\nHint:${defaultMsg}`)
   } else {
     core.setFailed(defaultMsg)
   }
@@ -39,7 +39,7 @@ export function parseInputFindAndReplaceFile(): FindAndReplaceFile | never {
   try {
     return FindAndReplaceFile.parse(inputFindAndReplaceFile)
   } catch (e) {
-    catchError(e, 'Sorry, the input file cannot be recognized as a JS file.')
+    catchError(e, 'The input file cannot be recognized as a JS file.')
   }
 }
 
@@ -76,6 +76,7 @@ export function findAndReplace(parsed_regex: DefaultExport) {
       let file_contents
       try {
         file_contents = readFileSync(file, 'utf-8')
+        if (file_contents === undefined) throw Error('File cannot be read.')
       } catch (e) {
         catchError(
           e,
