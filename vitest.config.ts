@@ -7,7 +7,7 @@ export default defineConfig({
       enabled: true,
       include: ['src/**'],
       reportsDirectory: 'coverage',
-      exclude: ['node_modules/**', 'dist/**'],
+      exclude: ['node_modules/**', 'dist/**', 'tsconfig.json'],
       reporter: ['json-summary', 'text', 'lcov']
     },
     // Uncomment the below lines if you would like to enforce a coverage threshold
