@@ -4,5 +4,6 @@
     "allowJs": true,
     "emitDeclarationOnly": true
   },
+  "references": [{ "path": "../src/tsconfig.json" }],
   "include": ["*.ts", "./find_and_replace_files"]
 }
