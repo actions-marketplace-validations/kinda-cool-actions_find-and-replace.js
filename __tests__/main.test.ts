@@ -6,21 +6,21 @@
  * so that the actual '@actions/core' module is not imported.
  */
 import * as core from '../__fixtures__/core.js'
-import { vi, describe, beforeEach, it, afterEach, expect, test } from 'vitest'
+import { vi, describe, afterEach, expect, test } from 'vitest'
 import {
-  run,
   parseRegexPatterns,
   parseInputFindAndReplaceFile,
   findAndReplace,
-  InputDefaultExport
+  DefaultExport
 } from '../src/main.js'
 import { getInput } from '@actions/core'
 import { exit } from 'node:process'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { globSync, readFileSync, writeFileSync } from 'node:fs'
 import {
   fixtureFindAndReplaceFilesPath,
   fixtureReplaceTargetFiles
 } from '../__fixtures__/utils.js'
+import { basename, join } from 'node:path'
 
 // Mocks should be declared before the module being tested is imported.
 vi.mock(import('@actions/core'), () => core)
@@ -37,7 +37,8 @@ vi.mock(import('node:fs'), async (importOriginal) => {
   const mod = await importOriginal()
   return {
     ...mod,
-    readFileSync: vi.fn()
+    readFileSync: vi.fn(),
+    writeFileSync: vi.fn()
   }
 })
 
@@ -51,41 +52,47 @@ describe('main.ts', () => {
     vi.mocked(getInput).mockImplementationOnce(() => 'hi.txt')
     expect(parseInputFindAndReplaceFile).toThrow('exit')
   })
-  test('parseRegexPatterns', () => {
+  test('parseRegexPatterns', async () => {
     // todo..
+    const matches = globSync(fixtureFindAndReplaceFilesPath + '*.js')
+    for (const match of matches) {
+      const parsedRegex = await parseRegexPatterns(match)
+      expect(DefaultExport.parse(parsedRegex).length).toBeGreaterThan(0)
+    }
   })
-})
-describe('main.tsa', () => {
-  beforeEach(() => {
-    // Set the action's inputs as return values from core.getInput().
-    core.getInput.mockImplementation(() => '500')
-  })
-
-  afterEach(() => {
-    vi.resetAllMocks()
-  })
-
-  it('Sets the time output', async () => {
-    await run()
-
-    // Verify the time output was set.
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      // Simple regex to match a time string in the format HH:MM:SS.
-      expect.stringMatching(/^\d{2}:\d{2}:\d{2}/)
-    )
-  })
-
-  it('Sets a failed status', async () => {
-    // Clear the getInput mock and return an invalid value.
-    core.getInput.mockClear().mockReturnValueOnce('this is not a number')
-    await run()
-
-    // Verify that the action was marked as failed.
-    expect(core.setFailed).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds is not a number'
-    )
+  test('findAndReplace', async () => {
+    const filename_to_regex: Record<string, DefaultExport> = {}
+    console.log(process.cwd())
+    const matches = globSync('./' + fixtureFindAndReplaceFilesPath + '*.js')
+    for (const match of matches) {
+      const path = join(process.cwd(), match)
+      const module = await import(path)
+      const defaultExport = module.default
+      filename_to_regex[match] = DefaultExport.parse(defaultExport)
+    }
+    let i = 0
+    const fake_filesystem: Record<string, string> = {}
+    const readingFiles = globSync(fixtureReplaceTargetFiles + '*')
+    vi.doUnmock(import('node:fs'))
+    const { readFileSync: unmockedReadFile } = await import('node:fs')
+    for (const file of readingFiles) {
+      fake_filesystem[file] = unmockedReadFile(file, 'utf-8')
+    }
+    vi.mocked(readFileSync).mockImplementation((filename) => {
+      return fake_filesystem[filename.toString()]
+    })
+    vi.mocked(writeFileSync).mockImplementation((filename, contents) => {
+      fake_filesystem[filename.toString()] = contents.toString()
+    })
+    for (const key in filename_to_regex) {
+      findAndReplace(filename_to_regex[key])
+      for (let j = i; j < vi.mocked(writeFileSync).mock.calls.length; j++) {
+        const calls = vi.mocked(writeFileSync).mock.calls
+        expect(fake_filesystem[calls[j][0].toString()]).toMatchFileSnapshot(
+          `__snapshots__/${basename(key, '.js')}/${basename(calls[j][0].toString())}`
+        )
+        i++
+      }
+    }
   })
 })
