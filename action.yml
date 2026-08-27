@@ -1,28 +1,28 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: JS Find and Replace
+description: Use a JS file to find and replace text!
+author: ahmed33033
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: heart
-  color: red
+  icon: search
+  color: blue
 
 # Define your inputs here.
 inputs:
   find_and_replace_file:
     description: |
-      The find and replace JS file. This JS file must have a default
-      export that exports an array with the following shape:
-        Array<{
-            find: RegExp
-            replace: string
-            files: Array<string>
-          }>
-      Expectedly, any expressions that match `find` will be replaced
-      by `replace` in all files in `files`.
+      The relative path to the find-and-replace JS file. 
 
-      `files` cannot contain any glob patterns; it's too powerful for
-      regex use.
+      The JS file must have a default export object with the following properties:
+        export default {
+            find: string | RegExp   // the thing to find
+            replace: string         // the thing to replace
+            files: string | Array<string>   // the file(s) to find and replace in
+        }
+      It can also export an array of objects with the aforementioned properties.
+
+      `files` should contain a relative path to file(s) that will be modified.
+      Glob patterns are not allowed; they're too powerful with regex.
     required: true
     default: 'find_and_replace.js'
 
