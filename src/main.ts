@@ -24,7 +24,6 @@ type FileModifications = Record<
   string,
   { oldContent: string; newContent: string }
 >
-const fileModifications: FileModifications = {}
 
 function catchError(e: unknown, defaultMsg: string): never {
   if (e instanceof Error) {
@@ -38,9 +37,9 @@ function catchError(e: unknown, defaultMsg: string): never {
 export async function run(): Promise<void> {
   const inputFindAndReplaceFile = parseInputFindAndReplaceFile()
   const regexPatterns = await parseRegexPatterns(inputFindAndReplaceFile)
-  findAndReplace(regexPatterns)
-  printJobSummary(inputFindAndReplaceFile)
-  setOutput()
+  const fileModifications = findAndReplace(regexPatterns)
+  printJobSummary(inputFindAndReplaceFile, fileModifications)
+  setOutput(fileModifications)
 }
 
 export function parseInputFindAndReplaceFile(): FindAndReplaceFile | never {
@@ -79,7 +78,9 @@ export async function parseRegexPatterns(
   return parsed_regex
 }
 
-export function findAndReplace(parsed_regex: DefaultExport) {
+export function findAndReplace(parsed_regex: DefaultExport): FileModifications {
+  const fileModifications: FileModifications = {}
+
   for (const pattern of parsed_regex) {
     for (const file of pattern.files) {
       let file_contents
@@ -104,6 +105,7 @@ export function findAndReplace(parsed_regex: DefaultExport) {
           `${file} could not be written to. Please make sure the file exists, and you have the necessary permissions to write to it.`
         )
       }
+
       if (file in fileModifications) {
         fileModifications[file] = {
           oldContent: fileModifications[file].oldContent,
@@ -117,9 +119,13 @@ export function findAndReplace(parsed_regex: DefaultExport) {
       }
     }
   }
+  return fileModifications
 }
 
-function printJobSummary(inputFindAndReplaceFile: string) {
+function printJobSummary(
+  inputFindAndReplaceFile: string,
+  fileModifications: FileModifications
+) {
   core.summary.addHeading('js-find-and-replace Action Summary')
   core.summary.addRaw(
     `**find-and-replace-file:** ${inputFindAndReplaceFile}`,
@@ -143,7 +149,7 @@ function printJobSummary(inputFindAndReplaceFile: string) {
   }
 }
 
-function setOutput() {
+function setOutput(fileModifications: FileModifications) {
   core.setOutput('modified-files', Object.keys(fileModifications).join(' '))
   core.setOutput(
     'modified-files-json',
