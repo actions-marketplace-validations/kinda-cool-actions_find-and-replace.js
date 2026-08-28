@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { exit } from 'node:process'
 import * as z from 'zod'
 import * as core from '@actions/core'
+import { createPatch } from 'diff'
 
 const FindAndReplaceFile = z.string().endsWith('.js')
 type FindAndReplaceFile = z.output<typeof FindAndReplaceFile>
@@ -19,6 +20,12 @@ export const DefaultExport = z.union([
 export type InputDefaultExport = z.input<typeof DefaultExport>
 export type DefaultExport = z.output<typeof DefaultExport>
 
+type FileModifications = Record<
+  string,
+  { oldContent: string; newContent: string }
+>
+const fileModifications: FileModifications = {}
+
 function catchError(e: unknown, defaultMsg: string): never {
   if (e instanceof Error) {
     core.setFailed(e.message + `\n\nHint:${defaultMsg}`)
@@ -32,6 +39,7 @@ export async function run(): Promise<void> {
   const inputFindAndReplaceFile = parseInputFindAndReplaceFile()
   const regexPatterns = await parseRegexPatterns(inputFindAndReplaceFile)
   findAndReplace(regexPatterns)
+  printJobSummary(inputFindAndReplaceFile)
 }
 
 export function parseInputFindAndReplaceFile(): FindAndReplaceFile | never {
@@ -95,6 +103,42 @@ export function findAndReplace(parsed_regex: DefaultExport) {
           `${file} could not be written to. Please make sure the file exists, and you have the necessary permissions to write to it.`
         )
       }
+      if (file in fileModifications) {
+        fileModifications[file] = {
+          oldContent: fileModifications[file].oldContent,
+          newContent: new_file_contents
+        }
+      } else {
+        fileModifications[file] = {
+          oldContent: file_contents,
+          newContent: new_file_contents
+        }
+      }
     }
   }
 }
+
+function printJobSummary(inputFindAndReplaceFile: string) {
+  core.summary.addHeading('js-find-and-replace Action Summary')
+  core.summary.addRaw(
+    `**find-and-replace-file:** ${inputFindAndReplaceFile}`,
+    true
+  )
+  core.summary.addRaw('The following are the changes made to each file:', true)
+  for (const file in fileModifications) {
+    core.summary.addDetails(
+      file,
+      core.summary
+        .addCodeBlock(
+          createPatch(
+            file,
+            fileModifications[file].oldContent,
+            fileModifications[file].newContent
+          ),
+          'diff'
+        )
+        .stringify()
+    )
+  }
+}
+
