@@ -145,4 +145,8 @@ function printJobSummary(inputFindAndReplaceFile: string) {
 
 function setOutput() {
   core.setOutput('modified-files', Object.keys(fileModifications).join(' '))
+  core.setOutput(
+    'modified-files-json',
+    JSON.stringify(Object.keys(fileModifications))
+  )
 }

@@ -26,6 +26,18 @@ inputs:
     required: true
     default: 'find-and-replace.js'
 
+outputs:
+  modified-files:
+    description: A space separated string of the modified files.
+  modified-files-json:
+    description: A string of the modified files formatted as a JSON array.
+
+outputs:
+  modified-files:
+    description: A space separated string of the modified files.
+  modified-files-json:
+    description: A string of the modified files formatted as a JSON array.
+
 runs:
   using: node24
   main: dist/index.js
