@@ -1,0 +1,9 @@
+Index: __fixtures__/replace_target_files/hi.txt
+===================================================================
+--- __fixtures__/replace_target_files/hi.txt
++++ __fixtures__/replace_target_files/hi.txt
+@@ -1,1 +1,1 @@
+-hi
+\ No newline at end of file
++bye
+\ No newline at end of file

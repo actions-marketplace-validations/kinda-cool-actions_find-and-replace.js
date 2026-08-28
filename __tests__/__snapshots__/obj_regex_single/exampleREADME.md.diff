@@ -1,0 +1,24 @@
+Index: __fixtures__/replace_target_files/exampleREADME.md
+===================================================================
+--- __fixtures__/replace_target_files/exampleREADME.md
++++ __fixtures__/replace_target_files/exampleREADME.md
+@@ -1,7 +1,7 @@
+ # Mermaid-Maker
+ 
+-`- uses: 'mermaid-maker/action@v5.6.7`
++`- uses: 'mermaid-maker/action@v1.2.3`
+ 
+ This action converts [mermaid](https://github.com/mermaid-js/mermaid) definition
+ files into one of the output formats: PNG, SVG, PDf.
+ 
+@@ -15,9 +15,9 @@
+ 2. Before you build your web-application, add the following lines:
+ 
+ ```yml
+ - name: Generate mermaid diagrams
+-  uses: 'mermaid-maker/action@v5.6.7'
++  uses: 'mermaid-maker/action@v1.2.3'
+   with:
+     pkg_manager: pnpm # replace with your node pkg manager (npm/pnpm/bun)
+     output_file_extension: svg # replace with your desired output file (svg/png/pdf)
+ ```

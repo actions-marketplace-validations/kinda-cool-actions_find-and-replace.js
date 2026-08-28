@@ -21,6 +21,7 @@ import {
   fixtureReplaceTargetFiles
 } from '../__fixtures__/utils.js'
 import { basename, join } from 'node:path'
+import { createPatch } from 'diff'
 
 // Mocks should be declared before the module being tested is imported.
 vi.mock(import('@actions/core'), () => core)
@@ -96,8 +97,10 @@ describe('main.ts', () => {
     vi.doUnmock(import('node:fs'))
     const { readFileSync: unmockedReadFile } = await import('node:fs')
     const replaceTargetFiles = globSync(fixtureReplaceTargetFiles + '*')
-    for (const file of replaceTargetFiles) {
-      fake_filesystem[file] = unmockedReadFile(file, 'utf-8')
+    const resetFakeFileSystem = () => {
+      for (const file of replaceTargetFiles) {
+        fake_filesystem[file] = unmockedReadFile(file, 'utf-8')
+      }
     }
     // mock readFileSync by having it read from our fake fs
     vi.mocked(readFileSync).mockImplementation((filename) => {
@@ -110,7 +113,8 @@ describe('main.ts', () => {
 
     let nextCallIndex = 0
     for (const jsFile in jsFileToRegex) {
-      findAndReplace(jsFileToRegex[jsFile])
+      resetFakeFileSystem()
+      const fileModifications = findAndReplace(jsFileToRegex[jsFile])
 
       /* writeFileSync can be called multiple times b/c
       multiple regex patterns can write to the same file*/
@@ -121,9 +125,22 @@ describe('main.ts', () => {
       ) {
         const calls = vi.mocked(writeFileSync).mock.calls
         const replaceTargetFile = calls[i][0].toString()
+
         // create snapshot in directory jsFile, with name replaceTargetFile
+        const snapshotDir = `__snapshots__/${basename(jsFile, '.js')}`
         await expect(fake_filesystem[replaceTargetFile]).toMatchFileSnapshot(
-          `__snapshots__/${basename(jsFile, '.js')}/${basename(replaceTargetFile)}`
+          `${snapshotDir}/${basename(replaceTargetFile)}`
+        )
+
+        // create diff snapshot used to test return of fileModifications
+        await expect(
+          createPatch(
+            replaceTargetFile,
+            fileModifications[replaceTargetFile].oldContent,
+            fileModifications[replaceTargetFile].newContent
+          )
+        ).toMatchFileSnapshot(
+          `${snapshotDir}/${basename(replaceTargetFile)}.diff`
         )
         nextCallIndex++
       }
