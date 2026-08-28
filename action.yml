@@ -9,7 +9,7 @@ branding:
 
 # Define your inputs here.
 inputs:
-  find_and_replace_file:
+  find-and-replace-file:
     description: |
       The relative path to the find-and-replace JS file. 
 
@@ -24,7 +24,7 @@ inputs:
       `files` should contain a relative path to file(s) that will be modified.
       Glob patterns are not allowed; they're too powerful with regex.
     required: true
-    default: 'find_and_replace.js'
+    default: 'find-and-replace.js'
 
 runs:
   using: node24
