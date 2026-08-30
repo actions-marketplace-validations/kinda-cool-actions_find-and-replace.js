@@ -5,13 +5,16 @@
  * functions and objects. For example, the core module is mocked in this test,
  * so that the actual '@actions/core' module is not imported.
  */
-import * as core from '../__fixtures__/core.js'
+import * as coreFixtures from '../__fixtures__/core.js'
 import { vi, describe, afterEach, expect, test } from 'vitest'
 import {
   parseRegexPatterns,
   parseInputFindAndReplaceFile,
   findAndReplace,
-  DefaultExport
+  printJobSummary,
+  setOutput,
+  DefaultExport,
+  FileModifications
 } from '../src/main.js'
 import { getInput } from '@actions/core'
 import { exit } from 'node:process'
@@ -22,9 +25,16 @@ import {
 } from '../__fixtures__/utils.js'
 import { basename, join } from 'node:path'
 import { createPatch } from 'diff'
+import * as core from '@actions/core'
 
 // Mocks should be declared before the module being tested is imported.
-vi.mock(import('@actions/core'), () => core)
+vi.mock(import('@actions/core'), async (importOriginal) => {
+  const mod = await importOriginal()
+  return {
+    ...mod,
+    ...coreFixtures
+  }
+})
 
 // mock exit function to avoid exitting tests
 vi.mock(import('node:process'), async (orig) => {
@@ -152,5 +162,15 @@ describe('main.ts', () => {
         { find: 'hello', replace: 'bye', files: ['fileThatDoesntExit.txt'] }
       ])
     ).toThrow('exit')
+  })
+
+  test('printJobSummary', () => {
+    const fileModifications: FileModifications = {
+      'hi.txt': { oldContent: 'hi', newContent: 'bye' }
+    }
+    printJobSummary('some-find-and-replace-file.js', fileModifications)
+    expect(vi.mocked(core).summary.stringify()).toMatchFileSnapshot(
+      '__snapshots__/printJobSummary.md'
+    )
   })
 })

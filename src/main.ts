@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { exit } from 'node:process'
 import * as z from 'zod'
 import * as core from '@actions/core'
-import { createPatch } from 'diff'
+import { createPatch, structuredPatch } from 'diff'
 
 const FindAndReplaceFile = z.string().endsWith('.js')
 type FindAndReplaceFile = z.output<typeof FindAndReplaceFile>
@@ -20,7 +20,7 @@ export const DefaultExport = z.union([
 export type InputDefaultExport = z.input<typeof DefaultExport>
 export type DefaultExport = z.output<typeof DefaultExport>
 
-type FileModifications = Record<
+export type FileModifications = Record<
   string,
   { oldContent: string; newContent: string }
 >
@@ -122,34 +122,57 @@ export function findAndReplace(parsed_regex: DefaultExport): FileModifications {
   return fileModifications
 }
 
-function printJobSummary(
+export function printJobSummary(
   inputFindAndReplaceFile: string,
   fileModifications: FileModifications
 ) {
   core.summary.addHeading('js-find-and-replace Action Summary')
   core.summary.addRaw(
-    `**find-and-replace-file:** ${inputFindAndReplaceFile}`,
+    `\nThe JS file used to find and replace text: \`${inputFindAndReplaceFile}\``,
     true
   )
-  core.summary.addRaw('The following are the changes made to each file:', true)
+
+  core.summary.addHeading('Modifications Summary', 3)
+
+  const tableRows: [string, string][] = []
+
+  for (const key of Object.keys(fileModifications)) {
+    tableRows.push([
+      key,
+      structuredPatch(
+        key,
+        key,
+        fileModifications[key].oldContent,
+        fileModifications[key].newContent
+      ).hunks.length.toString()
+    ])
+  }
+
+  core.summary.addTable([
+    [
+      { data: 'Modified File', header: true },
+      { data: 'Number of Modifications', header: true }
+    ],
+    ...tableRows
+  ])
+
+  core.summary.addHeading('Modification Details for Each file', 3)
+
   for (const file in fileModifications) {
     core.summary.addDetails(
       file,
-      core.summary
-        .addCodeBlock(
-          createPatch(
-            file,
-            fileModifications[file].oldContent,
-            fileModifications[file].newContent
-          ),
-          'diff'
-        )
-        .stringify()
+      '\n\n```diff\n' +
+        createPatch(
+          file,
+          fileModifications[file].oldContent,
+          fileModifications[file].newContent
+        ) +
+        '```\n\n'
     )
   }
 }
 
-function setOutput(fileModifications: FileModifications) {
+export function setOutput(fileModifications: FileModifications) {
   core.setOutput('modified-files', Object.keys(fileModifications).join(' '))
   core.setOutput(
     'modified-files-json',
