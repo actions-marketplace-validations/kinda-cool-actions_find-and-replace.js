@@ -169,8 +169,19 @@ describe('main.ts', () => {
       'hi.txt': { oldContent: 'hi', newContent: 'bye' }
     }
     printJobSummary('some-find-and-replace-file.js', fileModifications)
+    core.summary.stringify()
     expect(vi.mocked(core).summary.stringify()).toMatchFileSnapshot(
       '__snapshots__/printJobSummary.md'
     )
+  })
+
+  test('setOutput', () => {
+    const modifiedFiles = ['hi.txt', 'bye.txt']
+    const output: Record<string, string> = {}
+    vi.mocked(core.setOutput).mockImplementation((name, value) => {
+      output[name] = value
+    })
+    setOutput(modifiedFiles)
+    expect(JSON.parse(output['modified-files'])).toStrictEqual(modifiedFiles)
   })
 })

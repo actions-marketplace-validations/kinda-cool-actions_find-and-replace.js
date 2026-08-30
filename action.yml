@@ -28,15 +28,10 @@ inputs:
 
 outputs:
   modified-files:
-    description: A space separated string of the modified files.
-  modified-files-json:
-    description: A string of the modified files formatted as a JSON array.
+    description: |
+      A string containing the modified files, formatted as a JSON array. 
 
-outputs:
-  modified-files:
-    description: A space separated string of the modified files.
-  modified-files-json:
-    description: A string of the modified files formatted as a JSON array.
+      Example: '["hi.txt", "bye.txt"]'
 
 runs:
   using: node24

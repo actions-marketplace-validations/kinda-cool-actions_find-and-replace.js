@@ -39,7 +39,7 @@ export async function run(): Promise<void> {
   const regexPatterns = await parseRegexPatterns(inputFindAndReplaceFile)
   const fileModifications = findAndReplace(regexPatterns)
   printJobSummary(inputFindAndReplaceFile, fileModifications)
-  setOutput(fileModifications)
+  setOutput(Object.keys(fileModifications))
 }
 
 export function parseInputFindAndReplaceFile(): FindAndReplaceFile | never {
@@ -172,10 +172,6 @@ export function printJobSummary(
   }
 }
 
-export function setOutput(fileModifications: FileModifications) {
-  core.setOutput('modified-files', Object.keys(fileModifications).join(' '))
-  core.setOutput(
-    'modified-files-json',
-    JSON.stringify(Object.keys(fileModifications))
-  )
+export function setOutput(modifiedFiles: string[]) {
+  core.setOutput('modified-files', JSON.stringify(modifiedFiles))
 }
