@@ -1,0 +1,31 @@
+name: End 2 End test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./
+        id: find-and-replace
+        with:
+          file: __fixtures__/find_and_replace_files/array_mixed_mixed.js
+      - run: |
+          import os
+          import json
+
+          assert len(json.loads(os.environ('MODIFIED-FILES'))) == 5
+        env:
+          MODIFIED-FILES: ${{steps.find-and-replace.outputs.modified-files}}
