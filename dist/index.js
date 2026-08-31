@@ -33631,7 +33631,7 @@ async function run() {
     setOutput(Object.keys(fileModifications));
 }
 function parseInputFindAndReplaceFile() {
-    const inputFindAndReplaceFile = getInput('find_and_replace_file');
+    const inputFindAndReplaceFile = getInput('file');
     try {
         return FindAndReplaceFile.parse(inputFindAndReplaceFile);
     }
