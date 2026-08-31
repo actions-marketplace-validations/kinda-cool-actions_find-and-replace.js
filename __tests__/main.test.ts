@@ -164,13 +164,13 @@ describe('main.ts', () => {
     ).toThrow('exit')
   })
 
-  test('printJobSummary', () => {
+  test('printJobSummary', async () => {
     const fileModifications: FileModifications = {
       'hi.txt': { oldContent: 'hi', newContent: 'bye' }
     }
     printJobSummary('some-find-and-replace-file.js', fileModifications)
     core.summary.stringify()
-    expect(vi.mocked(core).summary.stringify()).toMatchFileSnapshot(
+    await expect(vi.mocked(core).summary.stringify()).toMatchFileSnapshot(
       '__snapshots__/printJobSummary.md'
     )
   })
