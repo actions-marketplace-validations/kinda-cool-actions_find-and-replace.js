@@ -1,3 +1,3 @@
-import { objSimpleSingle } from '../utils'
+import { objSimpleSingle } from '../utils.js'
 
 export default objSimpleSingle

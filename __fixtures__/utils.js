@@ -1,16 +1,15 @@
-import { InputDefaultExport } from '../src/main'
-
 export const fixtureFindAndReplaceFilesPath =
   '__fixtures__/find_and_replace_files/'
+
 export const fixtureReplaceTargetFiles = '__fixtures__/replace_target_files/'
 
-export const objSimpleSingle: InputDefaultExport = {
+export const objSimpleSingle = {
   find: 'hi',
   replace: 'bye',
   files: fixtureReplaceTargetFiles + 'hi.txt'
 }
 
-export const objSimpleArray: InputDefaultExport[] = [
+export const objSimpleArray = [
   {
     find: 'hi',
     replace: 'bye',
@@ -26,13 +25,13 @@ export const objSimpleArray: InputDefaultExport[] = [
   }
 ]
 
-export const objRegexSingle: InputDefaultExport = {
+export const objRegexSingle = {
   find: /mermaid-maker\/action@v\d+\.\d+\.\d+/g,
   replace: 'mermaid-maker/action@v1.2.3',
   files: fixtureReplaceTargetFiles + 'exampleREADME.md'
 }
 
-export const objRegexArray: InputDefaultExport[] = [
+export const objRegexArray = [
   {
     find: /mermaid-maker\/action@v\d+\.\d+\.\d+/g,
     replace: 'mermaid-maker/action@v1.2.3',

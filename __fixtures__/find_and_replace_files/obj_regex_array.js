@@ -1,3 +1,3 @@
-import { objRegexArray } from '../utils'
+import { objRegexArray } from '../utils.js'
 
 export default objRegexArray

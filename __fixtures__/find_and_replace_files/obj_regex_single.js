@@ -1,3 +1,3 @@
-import { objRegexSingle } from '../utils'
+import { objRegexSingle } from '../utils.js'
 
 export default objRegexSingle

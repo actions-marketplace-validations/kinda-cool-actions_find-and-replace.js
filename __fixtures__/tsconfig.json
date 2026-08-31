@@ -2,8 +2,9 @@
   "compilerOptions": {
     "composite": true,
     "allowJs": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "module": "nodenext"
   },
   "references": [{ "path": "../src/tsconfig.json" }],
-  "include": ["*.ts", "./find_and_replace_files"]
+  "include": ["*.ts", "*.js", "find_and_replace_files"]
 }
