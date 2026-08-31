@@ -43,7 +43,7 @@ export async function run(): Promise<void> {
 }
 
 export function parseInputFindAndReplaceFile(): FindAndReplaceFile | never {
-  const inputFindAndReplaceFile = core.getInput('find_and_replace_file')
+  const inputFindAndReplaceFile = core.getInput('file')
   try {
     return FindAndReplaceFile.parse(inputFindAndReplaceFile)
   } catch (e) {
