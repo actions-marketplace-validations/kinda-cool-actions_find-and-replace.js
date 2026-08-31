@@ -27,5 +27,6 @@ jobs:
           import json
 
           assert len(json.loads(os.environ('MODIFIED-FILES'))) == 5
+        shell: python
         env:
           MODIFIED-FILES: ${{steps.find-and-replace.outputs.modified-files}}
