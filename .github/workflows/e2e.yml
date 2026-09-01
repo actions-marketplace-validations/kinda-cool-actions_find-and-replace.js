@@ -12,21 +12,29 @@ permissions:
   contents: read
 
 jobs:
-  e2e:
+  setup_e2e:
     runs-on: ubuntu-latest
+    outputs:
+      find-and-replace-files: ${{steps.setup-files.outputs.files}}
+      test-obj: ${{steps.setup-files.outputs.test-obj}}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+      - run: node .github/workflow-utilities/fileListOutputter.js
+        id: setup-files
+  e2e:
+    runs-on: ubuntu-latest
+    needs: setup_e2e
+    strategy:
+      matrix:
+        file: ${{fromJson(needs.setup_e2e.outputs.find-and-replace-files)}}
+    steps:
       - uses: ./
         id: find-and-replace
         with:
-          file: __fixtures__/find_and_replace_files/array_mixed_mixed.js
-      - run: |
-          import os
-          import json
-
-          assert len(json.loads(os.environ['MODIFIED-FILES'])) == 5
-        shell: python
+          file: ${{matrix.file}}
+      - run: node .github/workflow-utilities/fileAsserter.js
         env:
-          MODIFIED-FILES: ${{steps.find-and-replace.outputs.modified-files}}
+          FIND_AND_REPLACE_FILE: ${{matrix.file}}
+          TEST_OBJ: ${{needs.setup_e2e.outputs.test-obj}}

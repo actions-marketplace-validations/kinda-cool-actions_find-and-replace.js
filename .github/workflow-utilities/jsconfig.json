@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "types": ["node"],
+    "noImplicitAny": false
+  },
+  "include": ["*.js"]
+}
