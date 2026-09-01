@@ -1,22 +1,38 @@
 # find-and-replace.js
 
-A GitHub Action that uses a JS file to find-and-replace text in your repo!
+![Coverage](./badges/coverage.svg) ![CI Status](https://www.github.com/kinda-cool-actions/find-and-replace.js/actions/workflows/ci.yml/badge.svg)![E2E Status](https://github.com/kinda-cool-actions/find-and-replace.js/actions/workflows/e2e.yml/badge.svg)
+
+A GitHub Action that finds and replaces text using a JS file!
 
 ## Quickstart
+
+Add the following JS file to your repo:
+
+```js
+// find-and-replace.js
+
+export default {
+  find: 'what you wanna find',
+  replace: 'what you wanna replace it with',
+  files: ['the file(s) that you wanna replace it in']
+}
+```
 
 Add the following step to your workflow:
 
 ```yml
+# release.yml
+
 - name: Find and Replace With JS
   id: find-and-replace-id
-  uses: kinda-cool-actions/find-and-replace.js
+  uses: kinda-cool-actions/find-and-replace.js@v2.3.0
   with:
     file: find-and-replace.js # The relative path to the JS file.
 ```
 
 It outputs `modified-files`, which is a string, JSON array of the modified files.
 
-See below for [further details](#input--output-details) and a [full sample workflow](#full-sample-workflow).
+See below for [further details](#input-details) and a [full sample workflow](#full-sample-workflow).
 
 ## But why JS??
 
@@ -36,7 +52,9 @@ Here are my counter questions:
 
 5. And finally, why not utilize the full-fledged force of a programming language like JS to define more complex patterns?
 
-## Input & Output Details
+## Input Details
+
+This action only has 1 input: `file`, which defaults to `find-and-replace.js`
 
 The input `file` must:
 
@@ -63,11 +81,9 @@ You can also export an array of objects, like so:
     }]
 ```
 
-The `file` input variable defaults to: `find-and-replace.js`
+## Output Details
 
----
-
-The step outputs the variable: `modiified-files`.
+The action only outputs 1 variable: `modifified-files`.
 
 This is a string, JSON array of the modified files.
 
@@ -75,9 +91,13 @@ Example: `'["hi.txt", "bye.txt"]'`, where `hi.txt` and `bye.txt` were both modif
 
 ## Full Sample Workflow
 
-Here's a sample workflow file:
+For a real example of how this action works, check out **this** repo! Yes, this action repo uses itself in a `release` workflow.
 
-```yml
+For brevity, the JS and workflow files are copied down below:
+
+```js
+// find-and-replace.js
+
 name: find and replace text
 on: push
 permissions:
@@ -124,4 +144,10 @@ jobs:
         run: |
           git commit -m "fix: find and replace text"
           git push
+```
+
+```yml
+# release.yml
+
+name: release
 ```
