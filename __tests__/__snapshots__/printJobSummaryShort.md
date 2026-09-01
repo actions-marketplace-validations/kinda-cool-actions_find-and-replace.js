@@ -6,7 +6,7 @@ The JS file used to find and replace text: `some-find-and-replace-file.js`
 <h3>Modification Details for Each file</h3>
 <details><summary>hi.txt</summary>
 
-```diff
+<pre lang="diff"><code>
 Index: hi.txt
 ===================================================================
 --- hi.txt
@@ -16,6 +16,6 @@ Index: hi.txt
 \ No newline at end of file
 +bye
 \ No newline at end of file
-```
+</code></pre>
 
 </details>

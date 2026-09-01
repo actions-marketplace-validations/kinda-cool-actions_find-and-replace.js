@@ -161,13 +161,13 @@ export function printJobSummary(
   for (const file in fileModifications) {
     core.summary.addDetails(
       file,
-      '\n\n```diff\n' +
+      '\n\n<pre lang="diff"><code>\n' +
         createPatch(
           file,
           fileModifications[file].oldContent,
           fileModifications[file].newContent
         ) +
-        '```\n\n'
+        '</code></pre>\n\n'
     )
   }
   core.summary.write()

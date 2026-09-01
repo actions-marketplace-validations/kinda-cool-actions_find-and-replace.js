@@ -166,13 +166,26 @@ describe('main.ts', () => {
   })
 
   test('printJobSummary', async () => {
-    const fileModifications: FileModifications = {
+    const fileModificationsShort: FileModifications = {
       'hi.txt': { oldContent: 'hi', newContent: 'bye' }
     }
-    printJobSummary('some-find-and-replace-file.js', fileModifications)
+    printJobSummary('some-find-and-replace-file.js', fileModificationsShort)
     core.summary.stringify()
     await expect(vi.mocked(core).summary.stringify()).toMatchFileSnapshot(
-      '__snapshots__/printJobSummary.md'
+      '__snapshots__/printJobSummaryShort.md'
+    )
+
+    core.summary.clear()
+
+    const fileModificationsLong: FileModifications = {
+      'hi.txt': { oldContent: 'hi', newContent: 'bye' },
+      'foo.txt': { oldContent: 'foo', newContent: 'bar' },
+      'rain.txt': { oldContent: 'rain', newContent: 'bow' }
+    }
+    printJobSummary('some-find-and-replace-file.js', fileModificationsLong)
+    core.summary.stringify()
+    await expect(vi.mocked(core).summary.stringify()).toMatchFileSnapshot(
+      '__snapshots__/printJobSummaryLong.md'
     )
   })
 
