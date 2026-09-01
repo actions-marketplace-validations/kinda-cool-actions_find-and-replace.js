@@ -1,6 +1,5 @@
 import { appendFileSync, globSync } from 'node:fs'
 import { fixtureFindAndReplaceFilesPath } from '../../__fixtures__/utils.js'
-import { string } from 'zod'
 import { basename, join } from 'node:path'
 
 if (process.env.GITHUB_OUTPUT == undefined)
@@ -20,7 +19,7 @@ for (const file of files) {
   if (!(defaultExport instanceof Array)) defaultExport = [defaultExport]
   let allModifiedFiles = []
   for (const pattern of defaultExport) {
-    if (pattern.files instanceof string) pattern.files = [pattern.files]
+    if (typeof pattern.files === 'string') pattern.files = [pattern.files]
     allModifiedFiles = allModifiedFiles.concat(pattern.files)
   }
   const uniqueFiles = Array.from(new Set(allModifiedFiles))
