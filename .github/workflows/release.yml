@@ -1,0 +1,28 @@
+name: Update Docs on Release
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  edit-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: main
+      - name: Find and Replace JS
+        uses: ./
+        with:
+          RELEASE_VERSION: ${{github.event.release.tag_name}}
+      - run: |
+          git config user.name ${{github.triggering_actor}}
+          git config user.email ${{github.actor_id}}@github-actions.com
+          git add .
+          git commit -m "docs: update readme"
+          git push
