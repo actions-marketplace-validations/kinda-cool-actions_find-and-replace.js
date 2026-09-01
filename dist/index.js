@@ -33712,9 +33712,9 @@ function printJobSummary(inputFindAndReplaceFile, fileModifications) {
     ]);
     summary.addHeading('Modification Details for Each file', 3);
     for (const file in fileModifications) {
-        summary.addDetails(file, '\n\n```diff\n' +
+        summary.addDetails(file, '\n\n<pre lang="diff"><code>\n' +
             createPatch(file, fileModifications[file].oldContent, fileModifications[file].newContent) +
-            '```\n\n');
+            '</code></pre>\n\n');
     }
     summary.write();
 }
