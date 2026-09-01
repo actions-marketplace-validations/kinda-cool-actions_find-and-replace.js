@@ -30,6 +30,7 @@ import * as core from '@actions/core'
 // Mocks should be declared before the module being tested is imported.
 vi.mock(import('@actions/core'), async (importOriginal) => {
   const mod = await importOriginal()
+  mod.summary.write = vi.fn<typeof mod.summary.write>()
   return {
     ...mod,
     ...coreFixtures
