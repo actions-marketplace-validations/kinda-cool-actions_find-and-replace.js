@@ -170,6 +170,7 @@ export function printJobSummary(
         '```\n\n'
     )
   }
+  core.summary.write()
 }
 
 export function setOutput(modifiedFiles: string[]) {
