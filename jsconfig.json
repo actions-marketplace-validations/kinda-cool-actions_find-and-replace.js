@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "types": ["node"]
+  },
+  "include": ["find-and-replace.js"]
+}
