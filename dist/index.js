@@ -33716,6 +33716,7 @@ function printJobSummary(inputFindAndReplaceFile, fileModifications) {
             createPatch(file, fileModifications[file].oldContent, fileModifications[file].newContent) +
             '```\n\n');
     }
+    summary.write();
 }
 function setOutput(modifiedFiles) {
     setOutput$1('modified-files', JSON.stringify(modifiedFiles));
