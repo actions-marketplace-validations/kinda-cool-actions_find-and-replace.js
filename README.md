@@ -25,7 +25,7 @@ Add the following step to your workflow:
 
 - name: Find and Replace With JS
   id: find-and-replace-id
-  uses: kinda-cool-actions/find-and-replace.js@7b90dc8047e8d5dd4022ed845b6b0d28cb2dfa80 # v2.5.1
+  uses: kinda-cool-actions/find-and-replace.js@fa2a97e0c0183968522c3c0ed33ad7b902b114e5  # v2.5.1
   with:
     file: find-and-replace.js # The relative path to the JS file.
 ```
@@ -115,7 +115,7 @@ const releaseWorkflow = readFileSync('.github/workflows/release.yml', 'utf-8')
 export default [
   {
     // find references to the action
-    find: /(kinda-cool-actions\/find-and-replace\.js@)v[\d.]+.*/g,
+    find: /(kinda-cool-actions\/find-and-replace\.js@).*/g,
 
     // replace with the new release sha and tag name using env
     // $\1 in regex refers to the first capture group
@@ -145,6 +145,7 @@ export default [
     files: 'README.md'
   }
 ]
+
 
 </code></pre>
 
@@ -180,5 +181,6 @@ jobs:
           git add .
           git commit -m "docs: update readme"
           git push
+
 
 </code></pre>
