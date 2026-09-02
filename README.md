@@ -93,7 +93,7 @@ Example: `'["hi.txt", "bye.txt"]'`, where `hi.txt` and `bye.txt` were both modif
 
 For a real example of how this action works, check out **this** repo! Yes, this action repo uses itself in a `release` workflow.
 
-For brevity, the JS and workflow files are copied down below:
+For brevity, the JS and YML workflow files are copied down below:
 
 ```js
 // find-and-replace.js

@@ -18,8 +18,9 @@ jobs:
           ref: main
       - name: Find and Replace JS
         uses: ./
-        with:
-          RELEASE_VERSION: ${{github.event.release.tag_name}}
+        env:
+          RELEASE_SHA: ${{github.sha}}
+          RELEASE_TAG: ${{github.event.release.tag_name}}
       - run: |
           git config user.name ${{github.triggering_actor}}
           git config user.email ${{github.actor_id}}@github-actions.com
