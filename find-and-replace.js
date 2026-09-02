@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs'
 
-const findAndReplaceFile = readFileSync('find-and-replace.js', 'utf-8')
+let findAndReplaceFile = readFileSync('find-and-replace.js', 'utf-8')
+// to avoid recursive regex substitutions, you can ignore this step
+findAndReplaceFile = findAndReplaceFile.replace(/\$(\d)/g, '$\\$1')
+
 const releaseWorkflow = readFileSync('.github/workflows/release.yml', 'utf-8')
 
 export default [
