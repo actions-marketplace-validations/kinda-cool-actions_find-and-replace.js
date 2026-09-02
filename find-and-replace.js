@@ -22,7 +22,7 @@ export default [
   },
   {
     // find the sample workflow section, then the js code snippet and match its contents
-    find: /(Sample Workflow.*find-and-replace\.js\s+).*?(\s+<\/code>.*?<\/pre>)/s,
+    find: /(Sample Workflow.*find-and-replace\.js\s+).*?(<\/code>.*?<\/pre>)/s,
 
     // replace the js code snippet's contents (the one you're currently reading)
     replace: `$1${findAndReplaceFile}$2`,
@@ -32,7 +32,7 @@ export default [
   },
   {
     // find the sample workflow section, then the yml code snippet and match contents
-    find: /(Sample Workflow.*release\.yml\s+).*?(\s+<\/code>.*<\/pre>)/s,
+    find: /(Sample Workflow.*release\.yml\s+).*?(<\/code>.*?<\/pre>)/s,
 
     // replace yml code snippet contents
     replace: `$1${releaseWorkflow}$2`,
