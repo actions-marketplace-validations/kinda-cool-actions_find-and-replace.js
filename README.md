@@ -25,7 +25,7 @@ Add the following step to your workflow:
 
 - name: Find and Replace With JS
   id: find-and-replace-id
-  uses: kinda-cool-actions/find-and-replace.js@v2.3.0
+  uses: kinda-cool-actions/find-and-replace.js@undefined
   with:
     file: find-and-replace.js # The relative path to the JS file.
 ```
@@ -98,56 +98,70 @@ For brevity, the JS and workflow files are copied down below:
 ```js
 // find-and-replace.js
 
-name: find and replace text
-on: push
-permissions:
-  contents: read # the whole workflow doesn't need write permissions
+import { readFileSync } from 'node:fs'
 
-jobs:
-  find-and-replace:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # only the job gets write permissions
+let findAndReplaceFile = readFileSync('find-and-replace.js', 'utf-8')
+// to avoid recursive regex substitutions, you can ignore this step
+findAndReplaceFile = findAndReplaceFile.replace(/\$(\d)/g, '$\\$\1')
 
-    steps:
-      - uses: actions/checkout@v7.0.2 # checkout repo
+const releaseWorkflow = readFileSync('.github/workflows/release.yml', 'utf-8')
 
-      - uses: kinda-cool-actions/find-and-replace.js
-        id: find-and-replace-id
-        with:
-          file: find-and-replace.js # this is the default value
+export default [
+  {
+    find: /kinda-cool-actions\/find-and-replace\.js@v\d+\.\d+\.\d+/g,
 
-      - name: setup git
-        run: |
-          git config user.name ${{github.actor}}
-          git config user.email ${{github.email}}
+    replace: `kinda-cool-actions/find-and-replace.js@${process.env.RELEASE_VERSION}`,
 
-      # i add, commit and push manually, but you can use a 3rd party action
+    files: 'README.md'
+  },
+  {
+    find: /(Sample Workflow.*```js.*?find-and-replace\.js\s+).*?(\s+```)/s,
 
-      # yes technically you can just use `git add .` instead of the following step
-      # but this is making sure you only add files from the find-and-replace step
-      - name: Stage modified files with python
-        run: |
-          import subprocess
-          import os
-          import json
+    replace: `$\1${findAndReplaceFile}$\2`,
 
-          # load up modified files
-          modified-files = json.loads(os.environ("MODIFIED-FILES"))
+    files: ['README.md']
+  },
+  {
+    find: /(Sample Workflow.*```yml.*?release\.yml\s+).*?(\s+```)/s,
 
-          for file in modified-files:
-            subprocess.run(['git', 'add', file])
-        env:
-          MODIFIED-FILES: ${{steps.find-and-replace-id.outputs.modified-files}}
+    replace: `$\1${releaseWorkflow}$\2`,
 
-      - name: commit and push
-        run: |
-          git commit -m "fix: find and replace text"
-          git push
+    files: 'README.md'
+  }
+]
+
 ```
 
 ```yml
 # release.yml
 
-name: release
+name: Update Docs on Release
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  edit-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: main
+      - name: Find and Replace JS
+        uses: ./
+        with:
+          RELEASE_VERSION: ${{github.event.release.tag_name}}
+      - run: |
+          git config user.name ${{github.triggering_actor}}
+          git config user.email ${{github.actor_id}}@github-actions.com
+          git add .
+          git commit -m "docs: update readme"
+          git push
+
 ```
