@@ -1,29 +1,52 @@
 name: Update Docs on Release
+
 on:
   release:
     types:
       - published
 
 permissions:
+  # keep read permissons for the whole workflow
   contents: read
+
+# not really necessary, but sure lets handle this case
+concurrency:
+  group: ${{github.sha}}
+  cancel-in-progress: true
 
 jobs:
   edit-readme:
     runs-on: ubuntu-latest
+    # keep write permissions for just this job
     permissions:
       contents: write
+
     steps:
+      # checkout this repo
       - uses: actions/checkout@v7.0.1
         with:
           ref: main
+
+      # use find and replace action (its own repo)
       - name: Find and Replace JS
+        id: find-and-replace
         uses: ./
+        # no `with` block b/c we use the default value for input `file`
         env:
+          # set env vars to use in find-and-replace.js file
           RELEASE_SHA: ${{github.sha}}
           RELEASE_TAG: ${{github.event.release.tag_name}}
-      - run: |
-          git config user.name ${{github.triggering_actor}}
-          git config user.email ${{github.actor_id}}@github-actions.com
-          git add .
-          git commit -m "docs: update readme"
-          git push
+
+      # you dont have to use a 3rd party action to git add an commit
+      # i just do so to demonstrate how you can use the outputs variable
+      - uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
+        with:
+          # The arguments for the `git add` command
+          add: ${{steps.find-and-replace.outputs.modified-files}}
+
+          # The name of the user that will be displayed as the author of the commit.
+          author_name: ${{github.triggering_actor}}
+
+          # The email of the user that will be displayed as the author of the commit.
+          # note this variable is sometimes 'ghost', it doesn not always resolve
+          author_email: ${{github.event.sender.email}}
