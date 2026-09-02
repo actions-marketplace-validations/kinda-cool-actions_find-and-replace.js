@@ -25,7 +25,7 @@ Add the following step to your workflow:
 
 - name: Find and Replace With JS
   id: find-and-replace-id
-  uses: kinda-cool-actions/find-and-replace.js@fa2a97e0c0183968522c3c0ed33ad7b902b114e5 # v2.5.1
+  uses: kinda-cool-actions/find-and-replace.js@9c3bf63162df7ef2aecf5c42e7b4d76ff8b7b705 # v2.5.2
   with:
     file: find-and-replace.js # The relative path to the JS file.
 ```
@@ -119,14 +119,14 @@ export default [
 
     // replace with the new release sha and tag name using env
     // $\1 in regex refers to the first capture group
-    replace: `$\1${process.env.RELEASE_SHA}  # ${process.env.RELEASE_TAG}`,
+    replace: `$\1${process.env.RELEASE_SHA} # ${process.env.RELEASE_TAG}`,
 
     // only do so for this file
     files: 'README.md'
   },
   {
     // find the sample workflow section, then the js code snippet and match its contents
-    find: /(Sample Workflow.*find-and-replace\.js\s+).*?(\s+<\/code>.*?<\/pre>)/s,
+    find: /(Sample Workflow.*find-and-replace\.js\s+).*?(<\/code>.*?<\/pre>)/s,
 
     // replace the js code snippet's contents (the one you're currently reading)
     replace: `$\1${findAndReplaceFile}$\2`,
@@ -136,7 +136,7 @@ export default [
   },
   {
     // find the sample workflow section, then the yml code snippet and match contents
-    find: /(Sample Workflow.*release\.yml\s+).*?(\s+<\/code>.*<\/pre>)/s,
+    find: /(Sample Workflow.*release\.yml\s+).*?(<\/code>.*?<\/pre>)/s,
 
     // replace yml code snippet contents
     replace: `$\1${releaseWorkflow}$\2`,
@@ -145,8 +145,6 @@ export default [
     files: 'README.md'
   }
 ]
-
-
 </code></pre>
 
 <pre lang='yml'><code>
@@ -181,6 +179,4 @@ jobs:
           git add .
           git commit -m "docs: update readme"
           git push
-
-
 </code></pre>
