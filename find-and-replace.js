@@ -11,7 +11,7 @@ const releaseWorkflow = readFileSync('.github/workflows/release.yml', 'utf-8')
 export default [
   {
     // find references to the action
-    find: /(kinda-cool-actions\/find-and-replace\.js@)v[\d.]+.*/g,
+    find: /(kinda-cool-actions\/find-and-replace\.js@).*/g,
 
     // replace with the new release sha and tag name using env
     // $1 in regex refers to the first capture group
