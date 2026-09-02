@@ -50,3 +50,5 @@ jobs:
           # The email of the user that will be displayed as the author of the commit.
           # note this variable is sometimes 'ghost', it doesn not always resolve
           author_email: ${{github.event.sender.email}}
+
+          message: 'docs: update docs with release info'
