@@ -15,7 +15,7 @@ export default [
 
     // replace with the new release sha and tag name using env
     // $1 in regex refers to the first capture group
-    replace: `$1${process.env.RELEASE_SHA}  # ${process.env.RELEASE_TAG}`,
+    replace: `$1${process.env.RELEASE_SHA} # ${process.env.RELEASE_TAG}`,
 
     // only do so for this file
     files: 'README.md'
