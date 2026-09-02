@@ -25,7 +25,7 @@ Add the following step to your workflow:
 
 - name: Find and Replace With JS
   id: find-and-replace-id
-  uses: kinda-cool-actions/find-and-replace.js@7b90dc8047e8d5dd4022ed845b6b0d28cb2dfa80  # vv2.5.1
+  uses: kinda-cool-actions/find-and-replace.js@7b90dc8047e8d5dd4022ed845b6b0d28cb2dfa80 # vv2.5.1
   with:
     file: find-and-replace.js # The relative path to the JS file.
 ```
@@ -99,7 +99,7 @@ For a real example of how this action works, check out **this** repo! Yes, this 
 
 For brevity, the JS and YML workflow files are copied down below:
 
-````js
+<pre lang='js'><code>
 // find-and-replace.js
 
 import { readFileSync } from 'node:fs'
@@ -145,16 +145,9 @@ export default [
     files: 'README.md'
   }
 ]
+</code></pre>
 
-
-
-```
-=======
-````
-
-> > > > > > > 9f6263b (docs: update docs)
-
-```yml
+<pre lang='yml'><code>
 # release.yml
 
 name: Update Docs on Release
@@ -186,5 +179,4 @@ jobs:
           git add .
           git commit -m "docs: update readme"
           git push
-
-```
+</code></pre>

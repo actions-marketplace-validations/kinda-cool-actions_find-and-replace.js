@@ -15,14 +15,14 @@ export default [
 
     // replace with the new release sha and tag name using env
     // $1 in regex refers to the first capture group
-    replace: `$1${process.env.RELEASE_SHA}  # v${process.env.RELEASE_TAG}`,
+    replace: `$1${process.env.RELEASE_SHA}  # ${process.env.RELEASE_TAG}`,
 
     // only do so for this file
     files: 'README.md'
   },
   {
     // find the sample workflow section, then the js code snippet and match its contents
-    find: /(Sample Workflow.*```js.*?find-and-replace\.js\s+).*?(\s+```)/s,
+    find: /(Sample Workflow.*find-and-replace\.js\s+).*?(\s+<\/code>.*?<\/pre>)/s,
 
     // replace the js code snippet's contents (the one you're currently reading)
     replace: `$1${findAndReplaceFile}$2`,
@@ -32,7 +32,7 @@ export default [
   },
   {
     // find the sample workflow section, then the yml code snippet and match contents
-    find: /(Sample Workflow.*```yml.*?release\.yml\s+).*?(\s+```)/s,
+    find: /(Sample Workflow.*release\.yml\s+).*?(\s+<\/code>.*<\/pre>)/s,
 
     // replace yml code snippet contents
     replace: `$1${releaseWorkflow}$2`,
