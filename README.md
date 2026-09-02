@@ -25,7 +25,7 @@ Add the following step to your workflow:
 
 - name: Find and Replace With JS
   id: find-and-replace-id
-  uses: kinda-cool-actions/find-and-replace.js@undefined
+  uses: kinda-cool-actions/find-and-replace.js@v2.5.0 # some placeholder
   with:
     file: find-and-replace.js # The relative path to the JS file.
 ```
@@ -89,13 +89,17 @@ This is a string, JSON array of the modified files.
 
 Example: `'["hi.txt", "bye.txt"]'`, where `hi.txt` and `bye.txt` were both modified.
 
+## Regex Debugging
+
+If you wanted to text out your regex patterns, [regex101.com](https://regex101.com/substitution?regex=%28kinda-cool-actions%5C%2Ffind-and-replace%5C.js%40%29v%5B%5Cd.%5D%2B.*&testString=kinda-cool-actions%2Ffind-and-replace.js%40v2.5.0++%23+name+of+the+action&flags=&flavor=javascript&delimiter=%2F&substitution=%241v1.2.3+%23+this+is+the+new+version) is a great resource. Check it out!!
+
 ## Full Sample Workflow
 
 For a real example of how this action works, check out **this** repo! Yes, this action repo uses itself in a `release` workflow.
 
 For brevity, the JS and YML workflow files are copied down below:
 
-```js
+````js
 // find-and-replace.js
 
 import { readFileSync } from 'node:fs'
@@ -140,9 +144,14 @@ export default [
     files: 'README.md'
   }
 ]
+<<<<<<< HEAD
 
 
 ```
+=======
+````
+
+> > > > > > > 9f6263b (docs: update docs)
 
 ```yml
 # release.yml
@@ -176,6 +185,4 @@ jobs:
           git add .
           git commit -m "docs: update readme"
           git push
-
-
 ```
