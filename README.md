@@ -148,7 +148,7 @@ export default [
 </code></pre>
 
 <pre lang='yml'><code>
-# release.yml
+# .github/workflows/release.yml
 
 name: Update Docs on Release
 
