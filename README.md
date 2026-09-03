@@ -89,6 +89,18 @@ This is a string, JSON array of the modified files.
 
 Example: `'["hi.txt", "bye.txt"]'`, where `hi.txt` and `bye.txt` were both modified.
 
+## But i can do this myself in a few lines of code...
+
+Yes, you can get most of this action's functionality with a few lines of `sed` or `JS`. This action attempts to be as simple as possible.
+
+What this action offers on top of its core functionality is:
+
+1. A detailed, meaningful job summary that notes which files where modified, along with the modifications (diff patches) that were made.
+
+2. An output variable — `modified-files` — that contains the modified files in a string, JSON array format, which can directly be consumed by subsequent actions like [Endbug's add and commit action](https://github.com/EndBug/add-and-commit).
+
+3. The action enables you to define and modify regex patterns without stepping into `yaml` workflow files, and using explicit, self-explanatory syntax, i.e. `find` and `replace`.
+
 ## Regex Debugging
 
 If you wanted to text out your regex patterns, [regex101.com](https://regex101.com/substitution?regex=%28kinda-cool-actions%5C%2Ffind-and-replace%5C.js%40%29v%5B%5Cd.%5D%2B.*&testString=kinda-cool-actions%2Ffind-and-replace.js%40v2.5.0++%23+name+of+the+action&flags=&flavor=javascript&delimiter=%2F&substitution=%241v1.2.3+%23+this+is+the+new+version) is a great resource. Check it out!!
