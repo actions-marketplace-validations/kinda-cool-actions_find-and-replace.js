@@ -25,7 +25,7 @@ Add the following step to your workflow:
 
 - name: Find and Replace With JS
   id: find-and-replace-id
-  uses: kinda-cool-actions/find-and-replace.js@9fe9ce648c70d25ce8ed6bc657bb4ec0ac6dcbdb # v2.5.4
+  uses: kinda-cool-actions/find-and-replace.js@5373cc04df87e1f99dbb72b143f3cded223718fb # v2.5.5
   with:
     file: find-and-replace.js # The relative path to the JS file.
 ```
